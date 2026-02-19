@@ -14,15 +14,15 @@ data "aws_subnets" "all" {
 
 data "aws_caller_identity" "current" {}
 
-# 2. Monitoring (Use v7 to avoid conflicts)
+# 2. Monitoring (Use v11 to avoid conflicts)
 resource "aws_cloudwatch_log_group" "strapi_logs" {
-  name              = "/ecs/strapi-task8-v11"
+  name              = "/ecs/strapi-task8-v12"
   retention_in_days = 7
 }
 
 # 3. Security Group
 resource "aws_security_group" "strapi_sg" {
-  name        = "strapi-sg-task8-v11"
+  name        = "strapi-sg-task8-v12"
   vpc_id      = data.aws_vpc.default.id
 
   ingress {
@@ -42,16 +42,16 @@ resource "aws_security_group" "strapi_sg" {
 
 # 4. Cluster
 resource "aws_ecs_cluster" "main" {
-  name = "strapi-cluster-task8-v11"
+  name = "strapi-cluster-task8-v12"
 }
 
 # 5. Task Definition
 resource "aws_ecs_task_definition" "app" {
-  family                   = "strapi-task-v11"
+  family                   = "strapi-task-v12"
   network_mode             = "awsvpc"
   requires_compatibilities = ["FARGATE"]
-  cpu                      = "256"
-  memory                   = "512"
+  cpu                      = "1024" # 1 vCPU
+  memory                   = "2048" # 2 GB RAM
   
   # Using the company role directly
   execution_role_arn       = "arn:aws:iam::811738710312:role/ecs_fargate_taskRole"
@@ -59,7 +59,7 @@ resource "aws_ecs_task_definition" "app" {
 
   container_definitions = jsonencode([{
     name      = "strapi-container"
-    image     = "${data.aws_caller_identity.current.account_id}.dkr.ecr.us-east-1.amazonaws.com/sagar-patade-strapi-app:latest"
+    image     = "811738710312.dkr.ecr.us-east-1.amazonaws.com/sagar-patade-strapi-app:latest"
     essential = true
     portMappings = [{
       containerPort = 1337
@@ -68,7 +68,7 @@ resource "aws_ecs_task_definition" "app" {
     logConfiguration = {
       logDriver = "awslogs"
       options = {
-        "awslogs-group"         = "/ecs/strapi-task8-v11"
+        "awslogs-group"         = "/ecs/strapi-task8-v12"
         "awslogs-region"        = "us-east-1"
         "awslogs-stream-prefix" = "ecs"
       }
@@ -78,7 +78,7 @@ resource "aws_ecs_task_definition" "app" {
 
 # 6. Service
 resource "aws_ecs_service" "main" {
-  name            = "strapi-service-v11"
+  name            = "strapi-service-v12"
   cluster         = aws_ecs_cluster.main.id
   task_definition = aws_ecs_task_definition.app.arn
   launch_type     = "FARGATE"
