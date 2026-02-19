@@ -1,5 +1,5 @@
 resource "aws_db_subnet_group" "strapi_db_group" {
-  name       = "strapi-db-subnet-group-v4"
+  name       = "strapi-db-subnet-group-v5" # Updated to v5
   subnet_ids = data.aws_subnets.all.ids 
 
   tags = {
@@ -10,7 +10,6 @@ resource "aws_db_subnet_group" "strapi_db_group" {
 resource "aws_db_instance" "strapi_db" {
   allocated_storage    = 20
   engine               = "postgres"
-  # Updated version to '16' for better compatibility
   engine_version       = "16" 
   instance_class       = "db.t3.micro"
   db_name              = "strapidb"
