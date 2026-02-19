@@ -2,7 +2,7 @@ provider "aws" {
   region = "us-east-1"
 }
 
-# 1. Data Sources for Networking
+# 1. Data Sources
 data "aws_vpc" "default" {
   default = true
 }
@@ -16,37 +16,15 @@ data "aws_subnets" "all" {
 
 data "aws_caller_identity" "current" {}
 
-# NEW: Dedicated IAM Role for ECS to bypass company role restrictions
-resource "aws_iam_role" "ecs_execution_role" {
-  name = "strapi-ecs-execution-role-task8"
-
-  assume_role_policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [{
-      Action = "sts:AssumeRole"
-      Effect = "Allow"
-      Principal = {
-        Service = "ecs-tasks.amazonaws.com"
-      }
-    }]
-  })
-}
-
-# NEW: Attach the standard Execution Policy to the new role
-resource "aws_iam_role_policy_attachment" "ecs_execution_role_policy" {
-  role       = aws_iam_role.ecs_execution_role.name
-  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
-}
-
-# 2. CloudWatch Log Group for Task 8 Monitoring
+# 2. CloudWatch Log Group (Updated to v4)
 resource "aws_cloudwatch_log_group" "strapi_logs" {
-  name              = "/ecs/strapi-task8-1714"
+  name              = "/ecs/strapi-task8-v4"
   retention_in_days = 7
 }
 
-# 3. Security Group for ECS
+# 3. Security Group (Updated to v4)
 resource "aws_security_group" "strapi_sg" {
-  name        = "strapi-sg-task8-1714"
+  name        = "strapi-sg-task8-v4"
   vpc_id      = data.aws_vpc.default.id
 
   ingress {
@@ -64,26 +42,25 @@ resource "aws_security_group" "strapi_sg" {
   }
 }
 
-# 4. ECS Cluster
+# 4. ECS Cluster (Updated to v4)
 resource "aws_ecs_cluster" "main" {
-  name = "strapi-cluster-task8"
+  name = "strapi-cluster-task8-v4"
 }
 
 # 5. ECS Task Definition
 resource "aws_ecs_task_definition" "app" {
-  family                   = "strapi-task"
+  family                   = "strapi-task-v4"
   network_mode             = "awsvpc"
   requires_compatibilities = ["FARGATE"]
   cpu                      = "256"
   memory                   = "512"
   
-  # Pointing to the NEW role we created above
-  execution_role_arn       = aws_iam_role.ecs_execution_role.arn
-  task_role_arn            = aws_iam_role.ecs_execution_role.arn
+  # Using the existing company role directly to avoid CreateRole error
+  execution_role_arn       = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/ec2-ecr-role"
+  task_role_arn            = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/ec2-ecr-role"
 
   container_definitions = jsonencode([{
     name      = "strapi-container"
-    # Using the full ECR path required by Fargate
     image     = "${data.aws_caller_identity.current.account_id}.dkr.ecr.us-east-1.amazonaws.com/sagar-patade-strapi-app:latest"
     essential = true
     portMappings = [{
@@ -93,7 +70,7 @@ resource "aws_ecs_task_definition" "app" {
     logConfiguration = {
       logDriver = "awslogs"
       options = {
-        "awslogs-group"         = "/ecs/strapi-task8-1714"
+        "awslogs-group"         = "/ecs/strapi-task8-v4"
         "awslogs-region"        = "us-east-1"
         "awslogs-stream-prefix" = "ecs"
       }
@@ -101,9 +78,9 @@ resource "aws_ecs_task_definition" "app" {
   }])
 }
 
-# 6. ECS Service
+# 6. ECS Service (Updated to v4)
 resource "aws_ecs_service" "main" {
-  name            = "strapi-service-1714"
+  name            = "strapi-service-v4"
   cluster         = aws_ecs_cluster.main.id
   task_definition = aws_ecs_task_definition.app.arn
   launch_type     = "FARGATE"
