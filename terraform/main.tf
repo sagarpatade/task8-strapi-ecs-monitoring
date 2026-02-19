@@ -2,7 +2,7 @@ provider "aws" {
   region = "us-east-1"
 }
 
-# This is the "missing" declaration
+# 1. Data Sources for Networking
 data "aws_vpc" "default" {
   default = true
 }
@@ -14,11 +14,15 @@ data "aws_subnets" "all" {
   }
 }
 
+data "aws_caller_identity" "current" {}
+
+# 2. CloudWatch Log Group for Task 8 Monitoring
 resource "aws_cloudwatch_log_group" "strapi_logs" {
   name              = "/ecs/strapi-task8-final"
   retention_in_days = 7
 }
 
+# 3. Security Group for ECS
 resource "aws_security_group" "strapi_sg" {
   name        = "strapi-sg-task8-final"
   vpc_id      = data.aws_vpc.default.id
@@ -38,4 +42,51 @@ resource "aws_security_group" "strapi_sg" {
   }
 }
 
-# ECS Cluster and Task Definition code follows here...
+# 4. ECS Cluster
+resource "aws_ecs_cluster" "main" {
+  name = "strapi-cluster-task8"
+}
+
+# 5. ECS Task Definition
+resource "aws_ecs_task_definition" "app" {
+  family                   = "strapi-task"
+  network_mode             = "awsvpc"
+  requires_compatibilities = ["FARGATE"]
+  cpu                      = "256"
+  memory                   = "512"
+  execution_role_arn       = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/ec2-ecr-role"
+  task_role_arn            = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/ec2-ecr-role"
+
+  container_definitions = jsonencode([{
+    name      = "strapi-container"
+    image     = "sagar-patade-strapi-app:latest"
+    essential = true
+    portMappings = [{
+      containerPort = 1337
+      hostPort      = 1337
+    }]
+    logConfiguration = {
+      logDriver = "awslogs"
+      options = {
+        "awslogs-group"         = "/ecs/strapi-task8-final"
+        "awslogs-region"        = "us-east-1"
+        "awslogs-stream-prefix" = "ecs"
+      }
+    }
+  }])
+}
+
+# 6. ECS Service (This is the resource Terraform was missing!)
+resource "aws_ecs_service" "main" {
+  name            = "strapi-service"
+  cluster         = aws_ecs_cluster.main.id
+  task_definition = aws_ecs_task_definition.app.arn
+  launch_type     = "FARGATE"
+  desired_count   = 1
+
+  network_configuration {
+    subnets          = data.aws_subnets.all.ids
+    security_groups  = [aws_security_group.strapi_sg.id]
+    assign_public_ip = true
+  }
+}
