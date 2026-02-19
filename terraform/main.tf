@@ -18,13 +18,13 @@ data "aws_caller_identity" "current" {}
 
 # 2. CloudWatch Log Group (Updated to v4)
 resource "aws_cloudwatch_log_group" "strapi_logs" {
-  name              = "/ecs/strapi-task8-v4"
+  name              = "/ecs/strapi-task8-v5"
   retention_in_days = 7
 }
 
-# 3. Security Group (Updated to v4)
+# 3. Security Group (Updated to v5)
 resource "aws_security_group" "strapi_sg" {
-  name        = "strapi-sg-task8-v4"
+  name        = "strapi-sg-task8-v5"
   vpc_id      = data.aws_vpc.default.id
 
   ingress {
@@ -44,12 +44,12 @@ resource "aws_security_group" "strapi_sg" {
 
 # 4. ECS Cluster (Updated to v4)
 resource "aws_ecs_cluster" "main" {
-  name = "strapi-cluster-task8-v4"
+  name = "strapi-cluster-task8-v5"
 }
 
 # 5. ECS Task Definition
 resource "aws_ecs_task_definition" "app" {
-  family                   = "strapi-task-v4"
+  family                   = "strapi-task-v5"
   network_mode             = "awsvpc"
   requires_compatibilities = ["FARGATE"]
   cpu                      = "256"
@@ -70,7 +70,7 @@ resource "aws_ecs_task_definition" "app" {
     logConfiguration = {
       logDriver = "awslogs"
       options = {
-        "awslogs-group"         = "/ecs/strapi-task8-v4"
+        "awslogs-group"         = "/ecs/strapi-task8-v5"
         "awslogs-region"        = "us-east-1"
         "awslogs-stream-prefix" = "ecs"
       }
@@ -80,7 +80,7 @@ resource "aws_ecs_task_definition" "app" {
 
 # 6. ECS Service (Updated to v4)
 resource "aws_ecs_service" "main" {
-  name            = "strapi-service-v4"
+  name            = "strapi-service-v5"
   cluster         = aws_ecs_cluster.main.id
   task_definition = aws_ecs_task_definition.app.arn
   launch_type     = "FARGATE"
