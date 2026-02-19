@@ -1,5 +1,5 @@
 resource "aws_db_subnet_group" "strapi_db_group" {
-  name = "strapi-db-subnet-group-${random_id.suffix.hex}"
+  name = "strapi-db-subnet-group-v8"
   subnet_ids = data.aws_subnets.all.ids 
 
 
