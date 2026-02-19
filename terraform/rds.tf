@@ -1,6 +1,5 @@
 resource "aws_db_subnet_group" "strapi_db_group" {
   name       = "strapi-db-subnet-group-final"
-  # Using all discovered IDs ensures we meet the 2+ AZ requirement
   subnet_ids = data.aws_subnets.all.ids 
 
   tags = {
@@ -11,7 +10,8 @@ resource "aws_db_subnet_group" "strapi_db_group" {
 resource "aws_db_instance" "strapi_db" {
   allocated_storage    = 20
   engine               = "postgres"
-  engine_version       = "16.1"
+  # Updated version to '16' for better compatibility
+  engine_version       = "16" 
   instance_class       = "db.t3.micro"
   db_name              = "strapidb"
   username             = "strapiuser"
