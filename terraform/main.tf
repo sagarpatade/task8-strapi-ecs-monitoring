@@ -18,13 +18,13 @@ data "aws_caller_identity" "current" {}
 
 # 2. CloudWatch Log Group for Task 8 Monitoring
 resource "aws_cloudwatch_log_group" "strapi_logs" {
-  name              = "/ecs/strapi-task8-final"
+  name              = "/ecs/strapi-task8-v3"
   retention_in_days = 7
 }
 
 # 3. Security Group for ECS
 resource "aws_security_group" "strapi_sg" {
-  name        = "strapi-sg-task8-final"
+  name        = "strapi-sg-task8-v3"
   vpc_id      = data.aws_vpc.default.id
 
   ingress {
@@ -68,7 +68,7 @@ resource "aws_ecs_task_definition" "app" {
     logConfiguration = {
       logDriver = "awslogs"
       options = {
-        "awslogs-group"         = "/ecs/strapi-task8-final"
+        "awslogs-group"         = "/ecs/strapi-task8-v3"
         "awslogs-region"        = "us-east-1"
         "awslogs-stream-prefix" = "ecs"
       }
