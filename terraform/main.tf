@@ -1,3 +1,24 @@
+# This creates a unique 4-character string (e.g., a1b2)
+resource "random_id" "suffix" {
+  byte_length = 2
+}
+
+resource "aws_cloudwatch_log_group" "strapi_logs" {
+  # Result: /ecs/strapi-task8-a1b2
+  name = "/ecs/strapi-task8-${random_id.suffix.hex}"
+}
+
+resource "aws_security_group" "strapi_sg" {
+  name = "strapi-sg-task8-${random_id.suffix.hex}"
+  # ... (rest of SG config)
+}
+
+resource "aws_ecs_service" "main" {
+  name = "strapi-service-${random_id.suffix.hex}"
+  # ... (rest of Service config)
+}
+
+
 provider "aws" {
   region = "us-east-1"
 }

@@ -1,6 +1,7 @@
 resource "aws_db_subnet_group" "strapi_db_group" {
-  name       = "strapi-db-subnet-group-v5" # Updated to v5
+  name = "strapi-db-subnet-group-${random_id.suffix.hex}"
   subnet_ids = data.aws_subnets.all.ids 
+
 
   tags = {
     Name = "Strapi DB Subnet Group"
