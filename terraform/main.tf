@@ -78,7 +78,7 @@ resource "aws_ecs_task_definition" "app" {
 
 # 6. ECS Service (This is the resource Terraform was missing!)
 resource "aws_ecs_service" "main" {
-  name            = "strapi-service"
+  name            = "strapi-service-v3"
   cluster         = aws_ecs_cluster.main.id
   task_definition = aws_ecs_task_definition.app.arn
   launch_type     = "FARGATE"
