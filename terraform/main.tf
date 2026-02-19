@@ -16,6 +16,28 @@ data "aws_subnets" "all" {
 
 data "aws_caller_identity" "current" {}
 
+# NEW: Dedicated IAM Role for ECS to bypass company role restrictions
+resource "aws_iam_role" "ecs_execution_role" {
+  name = "strapi-ecs-execution-role-task8"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Action = "sts:AssumeRole"
+      Effect = "Allow"
+      Principal = {
+        Service = "ecs-tasks.amazonaws.com"
+      }
+    }]
+  })
+}
+
+# NEW: Attach the standard Execution Policy to the new role
+resource "aws_iam_role_policy_attachment" "ecs_execution_role_policy" {
+  role       = aws_iam_role.ecs_execution_role.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
+}
+
 # 2. CloudWatch Log Group for Task 8 Monitoring
 resource "aws_cloudwatch_log_group" "strapi_logs" {
   name              = "/ecs/strapi-task8-1714"
@@ -54,12 +76,15 @@ resource "aws_ecs_task_definition" "app" {
   requires_compatibilities = ["FARGATE"]
   cpu                      = "256"
   memory                   = "512"
-  execution_role_arn       = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/ec2-ecr-role"
-  task_role_arn            = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/ec2-ecr-role"
+  
+  # Pointing to the NEW role we created above
+  execution_role_arn       = aws_iam_role.ecs_execution_role.arn
+  task_role_arn            = aws_iam_role.ecs_execution_role.arn
 
   container_definitions = jsonencode([{
     name      = "strapi-container"
-    image     = "sagar-patade-strapi-app:latest"
+    # Using the full ECR path required by Fargate
+    image     = "${data.aws_caller_identity.current.account_id}.dkr.ecr.us-east-1.amazonaws.com/sagar-patade-strapi-app:latest"
     essential = true
     portMappings = [{
       containerPort = 1337
@@ -76,7 +101,7 @@ resource "aws_ecs_task_definition" "app" {
   }])
 }
 
-# 6. ECS Service (This is the resource Terraform was missing!)
+# 6. ECS Service
 resource "aws_ecs_service" "main" {
   name            = "strapi-service-1714"
   cluster         = aws_ecs_cluster.main.id
@@ -90,5 +115,3 @@ resource "aws_ecs_service" "main" {
     assign_public_ip = true
   }
 }
-
-
