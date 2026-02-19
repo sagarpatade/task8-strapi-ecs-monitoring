@@ -1,32 +1,9 @@
-# This creates a unique 4-character string (e.g., a1b2)
-resource "random_id" "suffix" {
-  byte_length = 2
-}
-
-resource "aws_cloudwatch_log_group" "strapi_logs" {
-  # Result: /ecs/strapi-task8-a1b2
-  name = "/ecs/strapi-task8-${random_id.suffix.hex}"
-}
-
-resource "aws_security_group" "strapi_sg" {
-  name = "strapi-sg-task8-${random_id.suffix.hex}"
-  # ... (rest of SG config)
-}
-
-resource "aws_ecs_service" "main" {
-  name = "strapi-service-${random_id.suffix.hex}"
-  # ... (rest of Service config)
-}
-
-
 provider "aws" {
   region = "us-east-1"
 }
 
 # 1. Data Sources
-data "aws_vpc" "default" {
-  default = true
-}
+data "aws_vpc" "default" { default = true }
 
 data "aws_subnets" "all" {
   filter {
@@ -37,15 +14,15 @@ data "aws_subnets" "all" {
 
 data "aws_caller_identity" "current" {}
 
-# 2. CloudWatch Log Group (Updated to v4)
+# 2. Monitoring (Use v7 to avoid conflicts)
 resource "aws_cloudwatch_log_group" "strapi_logs" {
-  name              = "/ecs/strapi-task8-v5"
+  name              = "/ecs/strapi-task8-v7"
   retention_in_days = 7
 }
 
-# 3. Security Group (Updated to v5)
+# 3. Security Group
 resource "aws_security_group" "strapi_sg" {
-  name        = "strapi-sg-task8-v5"
+  name        = "strapi-sg-task8-v7"
   vpc_id      = data.aws_vpc.default.id
 
   ingress {
@@ -63,20 +40,20 @@ resource "aws_security_group" "strapi_sg" {
   }
 }
 
-# 4. ECS Cluster (Updated to v4)
+# 4. Cluster
 resource "aws_ecs_cluster" "main" {
-  name = "strapi-cluster-task8-v5"
+  name = "strapi-cluster-task8-v7"
 }
 
-# 5. ECS Task Definition
+# 5. Task Definition
 resource "aws_ecs_task_definition" "app" {
-  family                   = "strapi-task-v5"
+  family                   = "strapi-task-v7"
   network_mode             = "awsvpc"
   requires_compatibilities = ["FARGATE"]
   cpu                      = "256"
   memory                   = "512"
   
-  # Using the existing company role directly to avoid CreateRole error
+  # Using the company role directly
   execution_role_arn       = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/ec2-ecr-role"
   task_role_arn            = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/ec2-ecr-role"
 
@@ -91,7 +68,7 @@ resource "aws_ecs_task_definition" "app" {
     logConfiguration = {
       logDriver = "awslogs"
       options = {
-        "awslogs-group"         = "/ecs/strapi-task8-v5"
+        "awslogs-group"         = "/ecs/strapi-task8-v7"
         "awslogs-region"        = "us-east-1"
         "awslogs-stream-prefix" = "ecs"
       }
@@ -99,9 +76,9 @@ resource "aws_ecs_task_definition" "app" {
   }])
 }
 
-# 6. ECS Service (Updated to v4)
+# 6. Service
 resource "aws_ecs_service" "main" {
-  name            = "strapi-service-v5"
+  name            = "strapi-service-v7"
   cluster         = aws_ecs_cluster.main.id
   task_definition = aws_ecs_task_definition.app.arn
   launch_type     = "FARGATE"
