@@ -1,10 +1,10 @@
 resource "aws_db_subnet_group" "strapi_db_group" {
-  name = "strapi-db-subnet-group-v10"
+  # We are jumping to v15 to ensure no name collision
+  name       = "strapi-db-subnet-group-v15" 
   subnet_ids = data.aws_subnets.all.ids 
 
-
   tags = {
-    Name = "Strapi DB Subnet Group"
+    Name = "Strapi DB Subnet Group V15"
   }
 }
 
@@ -20,5 +20,7 @@ resource "aws_db_instance" "strapi_db" {
   skip_final_snapshot  = true
   db_subnet_group_name = aws_db_subnet_group.strapi_db_group.name
   publicly_accessible  = true
-  enabled_cloudwatch_logs_exports = ["postgresql", "upgrade"]
+  
+  # This helps if the DB already exists from a previous failed run
+  identifier = "strapi-db-v15" 
 }
