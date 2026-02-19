@@ -1,7 +1,8 @@
 # 1. Create a Subnet Group using your actual subnets
 resource "aws_db_subnet_group" "strapi_db_group" {
-  name       = "strapi-db-subnet-group"
-  subnet_ids = ["subnet-03b215d73e25bf9d1", "subnet-0402e41a2030320e1"] 
+  name       = "strapi-db-subnet-group-v2"
+  # Use the first two subnet IDs to ensure we hit at least 2 AZs
+  subnet_ids = [data.aws_subnets.all.ids[0], data.aws_subnets.all.ids[1]] 
 
   tags = {
     Name = "Strapi DB Subnet Group"

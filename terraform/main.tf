@@ -14,7 +14,7 @@ data "aws_subnets" "public" {
 
 # CLOUDWATCH LOGGING
 resource "aws_cloudwatch_log_group" "strapi_logs" {
-  name              = "/ecs/strapi"
+  name              = "/ecs/strapi-task8-logs"
   retention_in_days = 7
 }
 
@@ -29,7 +29,7 @@ resource "aws_ecs_cluster" "strapi_cluster" {
 
 # SECURITY GROUP FOR STRAPI
 resource "aws_security_group" "strapi_sg" {
-  name   = "strapi-sg-task8"
+  name   = "strapi-sg-task8-v2"
   vpc_id = data.aws_vpc.default.id
 
   ingress {
