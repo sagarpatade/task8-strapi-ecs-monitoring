@@ -2,8 +2,9 @@ provider "aws" {
   region = "us-east-1"
 }
 
-# 1. Data Sources
-data "aws_vpc" "default" { default = true }
+data "aws_vpc" "default" { 
+  id = "vpc-0295253d470704295" 
+}
 
 data "aws_subnets" "all" {
   filter {
