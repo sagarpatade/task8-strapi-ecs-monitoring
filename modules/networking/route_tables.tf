@@ -1,15 +1,18 @@
 # modules/networking/route_tables.tf
 
-# This routes all outbound traffic to the Internet Gateway
+# ------------------------------------------------------
+# PUBLIC ROUTE TABLE (For ALB & NAT Gateway)
+# ------------------------------------------------------
+# This routes all outbound traffic to the existing Internet Gateway
 resource "aws_route_table" "public" {
-  vpc_id = aws_vpc.main.id
+  vpc_id = data.aws_vpc.main.id
 
   route {
     cidr_block = "0.0.0.0/0"
-    gateway_id = aws_internet_gateway.igw.id
+    gateway_id = data.aws_internet_gateway.igw.id
   }
 
-  tags = { Name = "strapi-public-rt" }
+  tags = { Name = "sagar-public-rt" }
 }
 
 # Associate Public Subnets with the Public Route Table
@@ -23,20 +26,20 @@ resource "aws_route_table_association" "public_2" {
   route_table_id = aws_route_table.public.id
 }
 
-
+# ------------------------------------------------------
 # PRIVATE ROUTE TABLE (For ECS & RDS)
-
+# ------------------------------------------------------
 # This routes all outbound traffic to the NAT Gateway
 # (Keeps things private, but allows pulling ECR images)
 resource "aws_route_table" "private" {
-  vpc_id = aws_vpc.main.id
+  vpc_id = data.aws_vpc.main.id
 
   route {
     cidr_block     = "0.0.0.0/0"
     nat_gateway_id = aws_nat_gateway.nat.id
   }
 
-  tags = { Name = "strapi-private-rt" }
+  tags = { Name = "sagar-private-rt" }
 }
 
 # Associate Private Subnets with the Private Route Table
