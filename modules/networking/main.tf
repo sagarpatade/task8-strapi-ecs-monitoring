@@ -16,7 +16,7 @@ data "aws_internet_gateway" "igw" {
 # 3. Create Public Subnets
 resource "aws_subnet" "public_1" {
   vpc_id                  = data.aws_vpc.main.id 
-  cidr_block              = "10.0.101.0/24"      
+  cidr_block              = "10.0.211.0/24"      
   availability_zone       = "us-east-1a"
   map_public_ip_on_launch = true
   tags = { Name = "sagar-public-us-east-1a" }
@@ -24,7 +24,7 @@ resource "aws_subnet" "public_1" {
 
 resource "aws_subnet" "public_2" {
   vpc_id                  = data.aws_vpc.main.id
-  cidr_block              = "10.0.102.0/24"
+  cidr_block              = "10.0.212.0/24"
   availability_zone       = "us-east-1b"
   map_public_ip_on_launch = true
   tags = { Name = "sagar-public-us-east-1b" }
@@ -33,14 +33,14 @@ resource "aws_subnet" "public_2" {
 # 4. Create Private Subnets
 resource "aws_subnet" "private_1" {
   vpc_id            = data.aws_vpc.main.id
-  cidr_block        = "10.0.103.0/24"
+  cidr_block        = "10.0.213.0/24"
   availability_zone = "us-east-1a"
   tags = { Name = "sagar-private-us-east-1a" }
 }
 
 resource "aws_subnet" "private_2" {
   vpc_id            = data.aws_vpc.main.id
-  cidr_block        = "10.0.104.0/24"
+  cidr_block        = "10.0.214.0/24"
   availability_zone = "us-east-1b"
   tags = { Name = "sagar-private-us-east-1b" }
 }
