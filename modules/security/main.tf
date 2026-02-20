@@ -7,7 +7,7 @@ variable "vpc_id" {
 
 # 1. ALB Security Group (Public Facing)
 resource "aws_security_group" "alb_sg" {
-  name        = "strapi-alb-sg"
+  name        = "sagar-strapi-alb-sg"
   description = "Allow HTTP traffic from the internet"
   vpc_id      = var.vpc_id
 
@@ -28,7 +28,7 @@ resource "aws_security_group" "alb_sg" {
 
 # 2. ECS Security Group (Private App Layer)
 resource "aws_security_group" "ecs_sg" {
-  name        = "strapi-ecs-sg"
+  name        = "sagar-strapi-ecs-sg"
   description = "Allow traffic from ALB to Strapi"
   vpc_id      = var.vpc_id
 
@@ -49,7 +49,7 @@ resource "aws_security_group" "ecs_sg" {
 
 # 3. RDS Security Group (Private Data Layer)
 resource "aws_security_group" "rds_sg" {
-  name        = "strapi-rds-sg"
+  name        = "sagar-strapi-rds-sg"
   description = "Allow traffic from ECS to Database"
   vpc_id      = var.vpc_id
 

@@ -6,14 +6,14 @@ variable "rds_sg_id" { type = string }
 # 1. Database Subnet Group
 # This forces the RDS instance to ONLY launch inside our private subnets
 resource "aws_db_subnet_group" "strapi_db_subnet_group" {
-  name       = "strapi-production-db-subnet-group"
+  name       = "sagar-strapi-production-db-subnet-group"
   subnet_ids = var.private_subnets
   tags       = { Name = "strapi-private-db-subnet" }
 }
 
 # 2. The PostgreSQL Database
 resource "aws_db_instance" "strapi_db" {
-  identifier             = "strapi-production-db"
+  identifier             = "sagar-strapi-production-db"
   engine                 = "postgres"
   engine_version         = "16" # The exact version you used yesterday
   instance_class         = "db.t3.micro"
