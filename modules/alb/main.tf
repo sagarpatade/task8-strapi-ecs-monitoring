@@ -6,7 +6,7 @@ variable "alb_sg_id" { type = string }
 
 # 1. The Load Balancer itself (Internet Facing)
 resource "aws_lb" "main" {
-  name               = "strapi-alb"
+  name               = "-sagar-strapi-alb"
   internal           = false
   load_balancer_type = "application"
   security_groups    = [var.alb_sg_id]
@@ -17,7 +17,7 @@ resource "aws_lb" "main" {
 
 # 2. The Target Group (Where the ALB sends the traffic)
 resource "aws_lb_target_group" "strapi_tg" {
-  name        = "strapi-target-group"
+  name        = "sagar-strapi-tg"
   port        = 1337 # Strapi's port
   protocol    = "HTTP"
   vpc_id      = var.vpc_id
