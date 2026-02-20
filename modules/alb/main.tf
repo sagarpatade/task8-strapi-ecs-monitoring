@@ -17,7 +17,7 @@ resource "aws_lb" "main" {
 
 # 2. The Target Group (Where the ALB sends the traffic)
 resource "aws_lb_target_group" "strapi_tg" {
-  name        = "sagar-strapi-tg"
+  name        = "sagar-strapi-tg-2"
   port        = 1337 # Strapi's port
   protocol    = "HTTP"
   vpc_id      = var.vpc_id
