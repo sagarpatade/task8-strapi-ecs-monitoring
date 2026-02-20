@@ -6,7 +6,7 @@ variable "alb_sg_id" { type = string }
 
 # 1. The Load Balancer itself (Internet Facing)
 resource "aws_lb" "main" {
-  name               = "-sagar-strapi-alb"
+  name               = "sagar-strapi-alb"
   internal           = false
   load_balancer_type = "application"
   security_groups    = [var.alb_sg_id]
